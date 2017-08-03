@@ -1,0 +1,3 @@
+./python/complexify.py
+./midicsv/csvmidi csv-files/autoMusic.csv output/autoMusic.mid
+echo "Finished generating MIDI file (autoMusic.mid)"
