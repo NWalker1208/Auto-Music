@@ -1,5 +1,5 @@
 <h1>Auto-Music</h1>
-This is a set of scripts I wrote to compile multiple MIDI files into a single, simplified text file that a machine learning script can use. The MIDI files and the MIDICSV program have been gitignored to prevent potential copyright issues. Also, the scripts are only written to run on Linux.
+This is a set of scripts I wrote to compile multiple MIDI files into a single, simplified text file that a machine learning script can learn from. The MIDI files and the MIDICSV program have been gitignored to prevent potential copyright issues. Also, the scripts are only written to run on Linux.
 
 <h2>Setup</h2>
 In order for the scripts to run, a copy of the MIDICSV software must be put inside the "midicsv" folder. You can find that software <a href="http://www.fourmilab.ch/webtools/midicsv/">here</a>. In addition, one or more MIDI files should be placed inside the "midi-files" folder. Avoid using MIDI files with more than one track, as I haven't developed the scripts to include any more than one track in the end product.
