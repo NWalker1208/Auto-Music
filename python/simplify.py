@@ -55,7 +55,7 @@ with open(output_filename, 'w+') as out:
                 # Simply events and add to text file in order of time stamp
                 lastEventTime = 0
                 for keyPress in keyPresses:
-                    output_csv.writerow([str(keyPress['time'] - lastEventTime), chr(keyPress['note'] + 128), str(keyPress['length']), str(event['velocity'])])
+                    output_csv.writerow([str(keyPress['time'] - lastEventTime), chr(keyPress['note'] + 128), str(keyPress['length']), str(keyPress['velocity'])])
                                         
                     lastEventTime = keyPress['time']
         
