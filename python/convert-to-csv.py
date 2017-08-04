@@ -23,7 +23,7 @@ print("Found MIDI files:", midi_files)
 for file in os.listdir(csv_directory):
     file_path = os.path.join(csv_directory, file)
     try:
-        if os.path.isfile(file_path):
+        if os.path.isfile(file_path) and file_path.endswith(".csv"):
             os.unlink(file_path)
     except Exception as e:
         print(e)
@@ -36,7 +36,8 @@ for i, midi_file in enumerate(midi_files):
 
     f = open(os.path.join(csv_directory, "song" + str(i) + ".csv"), "w+")
     subprocess.call(["iconv", "-f", "UTF-8", "-t", "UTF-8", "-c", os.path.join(csv_directory, "temp.csv")], stdout=f)
-
+    f.close()
+    
     output_files.append("song" + str(i) + ".csv")
 
 print("Created " + str(len(output_files)) + " CSV files")

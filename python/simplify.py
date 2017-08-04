@@ -11,13 +11,13 @@ output_filename = os.path.join(script_location, '../output/simple.txt')
 
 # opening the file with w+ mode truncates the file
 with open(output_filename, 'w+') as out:
-    output_csv = csv.writer(out)
+    output_csv = csv.writer(out, lineterminator = "\n")
 
     for filename in os.listdir(csv_directory):
         if filename.endswith('.csv') and filename.startswith('song'): 
             # Process file
             with open(os.path.join(csv_directory, filename)) as song:
-                songCSV = csv.reader(song)
+                songCSV = csv.reader(song, lineterminator = "\n")
 
                 allEvents = []
 
@@ -26,10 +26,10 @@ with open(output_filename, 'w+') as out:
                     if (event[2][1:] == 'Note_on_c' or event[2][1:] == 'Note_off_c'):
                         track = int(event[0])
                         time = int(event[1][1:])
-                        active = event[2][1:] == 'Note_on_c'
                         channel = int(event[3][1:])
                         note = int(event[4][1:])
                         velocity = int(event[5][1:])
+                        active = (event[2][1:] == 'Note_on_c') and (velocity > 0)
     
                         allEvents.append({'time': time, 'active': active, 'note': note, 'velocity': velocity})
 
@@ -42,9 +42,9 @@ with open(output_filename, 'w+') as out:
                 lastEventTime = 0
                 for event in allEvents:
                     if event['active']:
-                        output_csv.writerow([str(event['time'] - lastEventTime), chr(event['note']), '1', str(event['velocity'])])
+                        output_csv.writerow([str(event['time'] - lastEventTime), chr(event['note'] + 128), '1', str(event['velocity'])])
                     else:
-                        output_csv.writerow([str(event['time'] - lastEventTime), chr(event['note']), '0', str(event['velocity'])])
+                        output_csv.writerow([str(event['time'] - lastEventTime), chr(event['note'] + 128), '0', str(event['velocity'])])
                                         
                     lastEventTime = event['time']
         

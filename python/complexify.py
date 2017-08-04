@@ -1,5 +1,6 @@
 #!/usr/bin/python3
 import os
+import subprocess
 import csv
 
 def clamp(n, minn, maxn):
@@ -25,9 +26,13 @@ with open(output_filename, "w+") as out:
     output_csv.writerow(["1", " 0", " MIDI_port", " 0"])
 
     totalTime = 0
+
+    f = open(os.path.join(csv_directory, "temp.csv"), "w+")
+    subprocess.call(["iconv", "-f", "UTF-8", "-t", "UTF-8", "-c", input_filename], stdout=f)
+    f.close()
     
-    with open(input_filename, "r") as simple:
-        simple_csv = csv.reader(simple)
+    with open(os.path.join(csv_directory, "temp.csv"), "r") as simple:
+        simple_csv = csv.reader(simple, lineterminator = "\n")
 
         i = 0
         for event in simple_csv:
@@ -39,7 +44,7 @@ with open(output_filename, "w+") as out:
                     time = totalTime
                     active = event[2] == "1"
                     channel = 0
-                    note = ord(event[1])
+                    note = ord(event[1]) - 128
                     velocity = clamp(int(event[3]), 0, 127)
 
                     if active:
@@ -47,7 +52,7 @@ with open(output_filename, "w+") as out:
                     else:
                         output_csv.writerow([str(track), ' ' + str(time), ' Note_off_c', ' ' + str(channel), ' ' + str(note), ' ' + str(velocity)])                    
                 except (ValueError, TypeError):
-                    print("Found faulty note, skipping...")
+                    print("Found faulty event, skipping...")
                 except:
                     print("Unexpected error occurred on event number " + str(i))
                     raise
