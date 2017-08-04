@@ -19,9 +19,9 @@ with open(output_filename, 'w+') as out:
             with open(os.path.join(csv_directory, filename)) as song:
                 songCSV = csv.reader(song, lineterminator = "\n")
 
+                # Grab all events from all tracks
                 allEvents = []
 
-                # Grab all events from all tracks
                 for event in songCSV:
                     if (event[2][1:] == 'Note_on_c' or event[2][1:] == 'Note_off_c'):
                         track = int(event[0])
@@ -30,7 +30,7 @@ with open(output_filename, 'w+') as out:
                         note = int(event[4][1:])
                         velocity = int(event[5][1:])
                         active = (event[2][1:] == 'Note_on_c') and (velocity > 0)
-    
+
                         allEvents.append({'time': time, 'active': active, 'note': note, 'velocity': velocity})
 
                 song.close()
@@ -38,15 +38,26 @@ with open(output_filename, 'w+') as out:
                 # Sort events by timestamp
                 allEvents = sorted(allEvents, key=itemgetter('time'))
                 
-                # Simply events and add to text file in order of time stamp
-                lastEventTime = 0
+                # Convert events into keypresses with time lengths
+                keyPresses = []
+                activeKeys = {}
+                
                 for event in allEvents:
                     if event['active']:
-                        output_csv.writerow([str(event['time'] - lastEventTime), chr(event['note'] + 128), '1', str(event['velocity'])])
-                    else:
-                        output_csv.writerow([str(event['time'] - lastEventTime), chr(event['note'] + 128), '0', str(event['velocity'])])
+                        activeKeys[event['note']] = {'time': event['time'], 'velocity': event['velocity']}
+                    elif event['note'] in activeKeys:
+                        keyPresses.append({'time': activeKeys[event['note']]['time'], 'length': (event['time'] - activeKeys[event['note']]['time']), 'note': event['note'], 'velocity': activeKeys[event['note']]['velocity']})
+                        del activeKeys[event['note']]
+
+                # Sort keypresses by timestamp
+                keyPresses = sorted(keyPresses, key=itemgetter('time'))
+                
+                # Simply events and add to text file in order of time stamp
+                lastEventTime = 0
+                for keyPress in keyPresses:
+                    output_csv.writerow([str(keyPress['time'] - lastEventTime), chr(keyPress['note'] + 128), str(keyPress['length']), str(event['velocity'])])
                                         
-                    lastEventTime = event['time']
+                    lastEventTime = keyPress['time']
         
             continue
         else:

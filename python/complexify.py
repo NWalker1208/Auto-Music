@@ -37,49 +37,26 @@ with open(output_filename, "w+") as out:
     with open(os.path.join(csv_directory, "temp.csv"), "r") as simple:
         simple_csv = csv.reader(simple, lineterminator = "\n")
 
-        active_notes = {} # Used to track notes that have been active for too long        
-        event_count = 0
+        all_events = []
+        
         i = 0
-        for event in simple_csv:
+        for key_press in simple_csv:
             i += 1
-            if len(event) == 4:
+            if len(key_press) == 4:
                 old_total_time = total_time
                 try:
                     track = 1
-                    total_time += int(event[0])
+                    total_time += int(key_press[0])
                     time = total_time
-                    active = event[2] == "1"
+                    length = int(key_press[2])
                     channel = 0
-                    note = ord(event[1][0]) - 128
-                    velocity = clamp(int(event[3]), 0, 127)
+                    note = ord(key_press[1][0]) - 128
+                    velocity = clamp(int(key_press[3]), 0, 127)
 
                     assert note > -1 and note < 128
 
-                    # Remove endless notes
-                    notes_to_remove = []
-                    for old_note, start_time in sorted(active_notes.items(), key=operator.itemgetter(1)):
-                        if start_time + note_time_limit <= total_time:
-                            output_csv.writerow([str(1), ' ' + str(start_time + note_time_limit), ' Note_off_c', ' ' + str(0), ' ' + str(old_note), ' ' + str(0)])
-
-                            notes_to_remove.append(old_note)
-
-                            print("Terminated endless note started at " + str(start_time) + " (" + str(start_time + note_time_limit) + ")")
-
-                    for old_note in notes_to_remove:
-                        del active_notes[old_note]
-                        
-                    if active:
-                        if not note in active_notes:
-                            output_csv.writerow([str(track), ' ' + str(time), ' Note_on_c', ' ' + str(channel), ' ' + str(note), ' ' + str(velocity)])
-                            
-                            active_notes[note] = total_time
-                    else:
-                        if note in active_notes:
-                            output_csv.writerow([str(track), ' ' + str(time), ' Note_off_c', ' ' + str(channel), ' ' + str(note), ' ' + str(0)])
-                            
-                            del active_notes[note]
-
-                    event_count += 1                 
+                    all_events.append({"track": track, "time": time, "active": True, "channel": 0, "note": note, "velocity": velocity})
+                    all_events.append({"track": track, "time": time + length, "active": False, "channel": 0, "note": note, "velocity": velocity})              
                 except (ValueError, TypeError, IndexError):
                     total_time = old_total_time
                     print("Found faulty event, skipping...")
@@ -90,12 +67,19 @@ with open(output_filename, "w+") as out:
                     print("Unexpected error occurred on event number " + str(i))
                     raise
                 
+        # Sort events by timestamp
+        all_events = sorted(all_events, key=operator.itemgetter('time'))
+
+        # Output events to file
+        for event in all_events:  
+            if event['active']:
+                output_csv.writerow([str(event['track']), ' ' + str(event['time']), ' Note_on_c', ' ' + str(event['channel']), ' ' + str(event['note']), ' ' + str(event['velocity'])])
+            else:
+                output_csv.writerow([str(event['track']), ' ' + str(event['time']), ' Note_off_c', ' ' + str(event['channel']), ' ' + str(event['note']), ' ' + str(0)])
                 
         simple.close()
 
-    total_time += 1
-
-    output_csv.writerow(["1", ' ' + str(total_time), " End_track"])
+    output_csv.writerow(["1", ' ' + str(all_events[-1]['time'] + 1), " End_track"])
     output_csv.writerow(["0", " 0", " End_of_file"])
 
     out.close()
