@@ -19,9 +19,9 @@ with open(output_filename, "w+") as out:
     # Header 
     output_csv.writerow(["0", " 0", " Header", " 1", " 1", " 480"])
     output_csv.writerow(["1", " 0", " Start_track"])
-    output_csv.writerow(["1", " 0", " Time_signature", " 2", " 2", " 24", " 8"])
-    output_csv.writerow(["1", " 0", " Key_signature", " 0", " \"major\""])
-    output_csv.writerow(["1", " 0", " Tempo", " 400000"])
+    #output_csv.writerow(["1", " 0", " Time_signature", " 2", " 2", " 24", " 8"])
+    #output_csv.writerow(["1", " 0", " Key_signature", " 0", " \"major\""])
+    #output_csv.writerow(["1", " 0", " Tempo", " 400000"])
     output_csv.writerow(["1", " 0", " MIDI_port", " 0"])
 
     totalTime = 0
